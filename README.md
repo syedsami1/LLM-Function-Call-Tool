@@ -1,22 +1,22 @@
-
 # LLM Function Call Tool
 
-This Task implements a chatbot powered by an LLM (Language Learning Model) that can trigger function calls when additional user input is needed. The chatbot is able to handle specific tasks like booking a flight by asking for further details when needed.
+This task implements a chatbot powered by an LLM (Language Learning Model) that can trigger function calls when additional user input is needed. The chatbot is capable of handling specific tasks like booking a flight by asking for further details when needed.
 
 ---
 
 ## Table of Contents
+
 1. [Project Overview](#project-overview)
 2. [Requirements](#requirements)
 3. [Setup Instructions](#setup-instructions)
 4. [How It Works](#how-it-works)
-5. [Code Files Overview](#code-files-overview)
+5. [Interactive Example](#interactive-example)
 6. [Usage](#usage)
-7. [License](#license)
 
 ---
 
 ## Project Overview
+
 This project is designed to create a chatbot using an API for LLMs like **Mistral-7B-Instruct**. It listens for requests, triggers a function call to request more details when needed, and provides dynamic responses based on the user's input.
 
 The primary goal of this project is to create a system where, upon receiving a specific request (like booking a flight), the LLM asks for additional user input, thus allowing seamless interactions with a tool that can perform real-world tasks.
@@ -24,6 +24,7 @@ The primary goal of this project is to create a system where, upon receiving a s
 ---
 
 ## Requirements
+
 - Python 3.x+
 - `requests` library for API interactions
 - `flask` for API management
@@ -31,6 +32,7 @@ The primary goal of this project is to create a system where, upon receiving a s
 - `python-dotenv` for loading environment variables from `.env` file
 
 ### Python Libraries:
+
 - `flask`
 - `requests`
 - `python-dotenv`
@@ -44,15 +46,18 @@ pip install -r requirements.txt
 ---
 
 ## Setup Instructions
+
 ### 1. Clone the repository
+
 First, clone this repository to your local machine.
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/syedsami1/LLM-Function-Call-Tool.git
 cd llm_function_call_tool
 ```
 
 ### 2. Set up a virtual environment
+
 It is recommended to use a virtual environment for this project to manage dependencies.
 
 ```bash
@@ -61,6 +66,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 ### 3. Install Dependencies
+
 Install the required libraries by running:
 
 ```bash
@@ -68,6 +74,7 @@ pip install -r requirements.txt
 ```
 
 ### 4. Set up the `.env` file
+
 Create a `.env` file in the root directory of the project to securely store your API keys and other environment variables. Here's an example `.env` file:
 
 ```env
@@ -77,7 +84,8 @@ TOGETHER_API_KEY=your_api_key_here
 ---
 
 ## How It Works
-### 1. **API Interaction**: 
+
+### 1. **API Interaction**:
 The chatbot interacts with an external LLM API (such as Together API or another service). It sends requests to the API to get responses based on user input.
 
 ### 2. **Function Call Triggering**:
@@ -88,129 +96,37 @@ A Flask server is used to handle incoming requests and manage the interactions b
 
 ---
 
-## Code Files Overview
+## Interactive Example
 
-### 1. **main.py**
-This file is the entry point for the chatbot. It runs the Flask application and handles incoming requests.
+Here’s an interactive example demonstrating how the chatbot interacts with the user, requests additional details, and provides a response:
 
-```python
-from app.chat import chat_with_llm
-from app.input_handler import handle_user_input
-from dotenv import load_dotenv
-import os
-
-# Load environment variables
-load_dotenv()
-
-def main():
-    print("Welcome to the LLM Chatbot! Type 'exit' or 'quit' to end the chat.")
-    
-    while True:
-        user_input = input("You: ")
-        
-        if user_input.lower() in ['exit', 'quit']:
-            print("Goodbye! 👋")
-            break
-        
-        # Process user input
-        response = chat_with_llm(user_input)
-        
-        # Handle response
-        if "LLM needs more information" in response:
-            print(f"🔹 LLM needs more information. Please provide input:")
-            additional_input = input()
-            response = chat_with_llm(additional_input)
-        
-        print(f"LLM: {response}")
-        
-if __name__ == "__main__":
-    main()
-```
-
-### 2. **app/chat.py**
-This file contains the core logic for interacting with the LLM. It sends user input to the API and processes the response.
-
-```python
-import requests
-import os
-
-API_URL = "https://api.together.xyz/v1/chat/completions"
-API_KEY = os.getenv("TOGETHER_API_KEY")
-
-def chat_with_llm(user_input):
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    data = {
-        "model": "mistralai/Mistral-7B-Instruct-v0.1",
-        "messages": [{"role": "user", "content": user_input}]
-    }
-    
-    try:
-        response = requests.post(API_URL, headers=headers, json=data)
-        response.raise_for_status()
-        response_json = response.json()
-        return response_json['choices'][0]['message']['content']
-    except requests.exceptions.RequestException as e:
-        return f"API Error: {e}"
+**Example Interaction**:
 
 ```
+Welcome to the LLM Chatbot! Type 'exit' or 'quit' to end the chat.
 
-### 3. **app/input_handler.py**
-This file is responsible for handling and validating the user's input.
+You: What is AI?
+LLM: AI stands for Artificial Intelligence. It is a branch of computer science that focuses on the development of intelligent machines that can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI systems use algorithms, machine learning, and other techniques to learn from data and improve their performance over time. They can be used in a wide range of applications, from virtual assistants and self-driving cars to medical diagnosis and financial analysis.
 
-```python
-def handle_user_input(user_input):
-    # Check if the input requires more information
-    if "book a flight" in user_input.lower():
-        return "🔹 LLM needs more information. Please provide input:"
-    return user_input
+You: Book a flight
+LLM: Sure, I can help you book a flight. Can you please provide me with the following information:
+
+1. Departure city and airport
+2. Arrival city and airport
+3. Departure date and time
+4. Return date and time (if applicable)
+5. Number of passengers
+6. Class of seating (economy, business, first class)
+7. Preferred airline (if any)
+8. Any specific requirements or preferences
 ```
 
-### 4. **app/model_loader.py**
-This file is used to load and interact with the model and API.
-
-```python
-import os
-import requests
-
-API_KEY = os.getenv("TOGETHER_API_KEY")
-API_URL = "https://api.together.xyz/v1/chat/completions"
-
-def generate_response(prompt):
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    data = {
-        "model": "mistralai/Mistral-7B-Instruct-v0.1",
-        "messages": [{"role": "user", "content": prompt}]
-    }
-    
-    try:
-        response = requests.post(API_URL, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json()['choices'][0]['message']['content']
-    except requests.exceptions.RequestException as e:
-        return f"API Error: {e}"
-
-```
-
-### 5. **requirements.txt**
-Contains all the dependencies for the project:
-
-```
-flask
-requests
-python-dotenv
-```
+In this example, after the user asks to "book a flight", the LLM triggers a function call to collect additional details before proceeding.
 
 ---
 
 ## Usage
+
 1. **Run the chatbot**:
    To start the chatbot, simply run the following command:
 
@@ -229,8 +145,4 @@ python-dotenv
    You: Book a flight
    LLM: Sure, I can help you book a flight. Can you provide the details?
    ```
-
----
-
-
 
